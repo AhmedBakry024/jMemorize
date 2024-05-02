@@ -255,7 +255,13 @@ public class CardPanel extends JPanel
 
         public void setStyle(MutableAttributeSet attr, boolean enabled)
         {
+
             StyleConstants.setBold(attr, enabled);
+            if(enabled)
+            {
+                StyleConstants.setItalic(attr,!enabled);
+                StyleConstants.setUnderline(attr,!enabled);
+            }
         }
     }
     
@@ -274,7 +280,13 @@ public class CardPanel extends JPanel
 
         public void setStyle(MutableAttributeSet attr, boolean enabled)
         {
+
             StyleConstants.setItalic(attr, enabled);
+            if(enabled)
+            {
+                StyleConstants.setBold(attr,!enabled);
+                StyleConstants.setUnderline(attr,!enabled);
+            }
         }
     }
     
@@ -293,7 +305,13 @@ public class CardPanel extends JPanel
 
         public void setStyle(MutableAttributeSet attr, boolean enabled)
         {
+
             StyleConstants.setUnderline(attr, enabled);
+            if(enabled)
+            {
+                StyleConstants.setBold(attr,!enabled);
+                StyleConstants.setItalic(attr,!enabled);
+            }
         }
     }
     
