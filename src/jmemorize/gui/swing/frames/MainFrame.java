@@ -18,12 +18,7 @@
  */
 package jmemorize.gui.swing.frames;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -178,7 +173,10 @@ public class MainFrame extends JFrame implements CategoryObserver,
         
         m_main.addLearnSessionObserver(this);
         m_main.addProgramEndObserver(this);
+
     }
+
+
 
     /*
      * Simply listen for card selection events in learn and decktable panel
@@ -663,14 +661,14 @@ public class MainFrame extends JFrame implements CategoryObserver,
             return m_deckTablePanel.getCardTable();
         }
     }
-    
-    private void initComponents()
+
+    private void initComponents() // This method initializes all the GUI components
     {
         JPanel mainPanel = new JPanel(new BorderLayout());
-        
+
         m_deckChartPanel = new DeckChartPanel(this);
         m_deckChartPanel.setMinimumSize(new Dimension(100, 150));
-        
+
         m_learnPanel = new LearnPanel();
         m_deckTablePanel = new DeckTablePanel(this);
 
@@ -687,10 +685,10 @@ public class MainFrame extends JFrame implements CategoryObserver,
             {
                 treeSelectionChanged(source);
             }
-            
+
         });
         m_treeScrollPane = new JScrollPane(m_categoryTree);
-        
+
         // bottom panel
         m_bottomPanel = new JPanel(new CardLayout());
         m_bottomPanel.add(m_deckTablePanel, DECK_CARD);
@@ -702,10 +700,10 @@ public class MainFrame extends JFrame implements CategoryObserver,
         m_verticalSplitPane.setBorder(null);
         BasicSplitPaneUI ui = (BasicSplitPaneUI)m_verticalSplitPane.getUI();
         ui.getDivider().setBorder(new EmptyBorder(5, 2, 5, 2));
-        
+
         m_verticalSplitPane.setTopComponent(m_deckChartPanel);
         m_verticalSplitPane.setBottomComponent(m_bottomPanel);
-        
+
         mainPanel.setPreferredSize(new Dimension(800, 500));
         mainPanel.add(m_verticalSplitPane, BorderLayout.CENTER);
 
@@ -717,11 +715,12 @@ public class MainFrame extends JFrame implements CategoryObserver,
 
         m_horizontalSplitPane.setLeftComponent(m_treeScrollPane);
         m_horizontalSplitPane.setRightComponent(mainPanel);
-        
+
         // frame content pane
         getContentPane().add(northPanel, BorderLayout.NORTH);
         getContentPane().add(m_horizontalSplitPane, BorderLayout.CENTER);
         getContentPane().add(m_statusBar, BorderLayout.SOUTH);
+        getContentPane().add(buildModeTogglePanel(), BorderLayout.SOUTH); // Add mode toggle button to the south
         setJMenuBar(new MainMenu(this, m_main.getRecentLessonFiles()));
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -731,12 +730,24 @@ public class MainFrame extends JFrame implements CategoryObserver,
                 ExitAction.exit();
             }
         });
-        
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(
             getClass().getResource("/resource/icons/main.png"))); //$NON-NLS-1$
         pack();
     }
 
+    private JPanel buildModeTogglePanel() { // This method builds the mode toggle panel with a toggle button
+        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton modeToggleButton = new JButton("Toggle");
+        modeToggleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleMode();
+            }
+        });
+        togglePanel.add(modeToggleButton);
+        return togglePanel;
+    }
     private JPanel buildCategoryBar()
     {
         JToolBar categoryToolbar = new JToolBar();
@@ -828,4 +839,55 @@ public class MainFrame extends JFrame implements CategoryObserver,
                 (int)summary.getSkipped(), (int)summary.getRelearned());
         }
     }
+
+     /////////////////////////////////////////////
+    //////////////////////////////////////////////
+    private boolean islightMode = true;
+    public void toggleMode() {
+        islightMode = !islightMode;
+        if (islightMode) {
+            applyLightMode(getContentPane());
+        } else {
+            applyDarkMode(getContentPane());
+        }
+    }
+
+    private void applyDarkMode(Component component) {
+        if (component instanceof Container) { // If the component is a container (JPanel)
+            Container container = (Container) component;
+            component.setBackground(Color.darkGray);
+            component.setForeground(Color.GRAY);
+            for (Component child : container.getComponents()) {
+                if (child instanceof JButton) {
+                    // If the child component is a JButton, set its background to dark gray and text color to white
+                    child.setBackground(Color.darkGray);
+                    child.setForeground(Color.white);
+                } else {
+                    // For non-button components, set text color to white and apply dark mode recursively
+                    child.setForeground(Color.white);
+                    applyDarkMode(child);
+                }
+            }
+        }
+    }
+
+
+    private void applyLightMode(Component component) {
+        if (component instanceof Container) {
+            Container container = (Container) component;
+            component.setBackground(Color.white);
+            component.setForeground(Color.black);
+            for (Component child : container.getComponents()) {
+                if (child instanceof JButton) {
+                    child.setBackground(Color.white);
+                    child.setForeground(Color.black);
+                } else {
+                    child.setForeground(Color.black);
+                    applyLightMode(child);
+                }
+            }
+        }
+    }
+
+
 }
